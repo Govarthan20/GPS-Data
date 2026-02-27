@@ -1,0 +1,34 @@
+﻿Initialized native services in: C:\Users\LENOVO\.gradle\native
+Initialized jansi services in: C:\Users\LENOVO\.gradle\native
+Received JVM installation metadata from 'C:\Program Files\Java\jdk-17': {JAVA_HOME=C:\Program Files\Java\jdk-17, JAVA_VERSION=17.0.12, JAVA_VENDOR=Oracle Corporation, RUNTIME_NAME=Java(TM) SE Runtime Environment, RUNTIME_VERSION=17.0.12+8-LTS-286, VM_NAME=Java HotSpot(TM) 64-Bit Server VM, VM_VERSION=17.0.12+8-LTS-286, VM_VENDOR=Oracle Corporation, OS_ARCH=amd64}
+The client will now receive all logging from the daemon (pid: 30856). The daemon log file: C:\Users\LENOVO\.gradle\daemon\8.2.1\daemon-30856.out.log
+Starting 5th build in daemon [uptime: 7 mins 24.486 secs, performance: 100%, GC rate: 0.00/s, heap usage: 0% of 1.5 GiB]
+Using 12 worker leases.
+Now considering [C:\ReactWorkSpace\GPS-Data\android] as hierarchies to watch
+Watching the file system is configured to be enabled if available
+File system watching is active
+Starting Build
+Settings evaluated using settings file 'C:\ReactWorkSpace\GPS-Data\android\settings.gradle'.
+Projects loaded. Root project using build file 'C:\ReactWorkSpace\GPS-Data\android\build.gradle'.
+Included projects: [root project 'android', project ':app', project ':capacitor-android', project ':capacitor-cordova-android-plugins', project ':capacitor-geolocation', project ':capacitor-splash-screen', project ':capacitor-status-bar']
+
+> Configure project :
+Evaluating root project 'android' using build file 'C:\ReactWorkSpace\GPS-Data\android\build.gradle'.
+The configuration :classpath is both resolvable and consumable. This is considered a legacy configuration and it will eventually only be possible to be one of these.
+The configuration :classpath is both consumable and declarable. This combination is incorrect, only one of these flags should be set.
+The configuration :classpath is both resolvable and consumable. This is considered a legacy configuration and it will eventually only be possible to be one of these.
+The configuration :classpath is both consumable and declarable. This combination is incorrect, only one of these flags should be set.
+
+> Configure project :app
+Evaluating project ':app' using build file 'C:\ReactWorkSpace\GPS-Data\android\app\build.gradle'.
+Using default execution profile
+google-services.json not found, google-services plugin not applied. Push Notifications won't work
+WARNING: Using flatDir should be avoided because it doesn't support any meta-data formats.
+
+> Configure project :capacitor-android
+Evaluating project ':capacitor-android' using build file 'C:\ReactWorkSpace\GPS-Data\node_modules\@capacitor\android\capacitor\build.gradle'.
+The configuration :capacitor-android:classpath is both resolvable and consumable. This is considered a legacy configuration and it will eventually only be possible to be one of these.
+The configuration :capacitor-android:classpath is both consumable and declarable. This combination is incorrect, only one of these flags should be set.
+The configuration :capacitor-android:classpath is both resolvable and consumable. This is considered a legacy configuration and it will eventually only be possible to be one of these.
+The configuration :capacitor-android:classpath is both consumable and declarable. This combination is incorrect, only one of these flags should be set.
+Watched directory hierarchies: []

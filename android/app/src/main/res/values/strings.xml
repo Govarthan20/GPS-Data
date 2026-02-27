@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Vedanta FleetPulse</string>
+    <string name="title_activity_main">Vedanta FleetPulse</string>
+    <string name="package_name">com.vedanta.fleetpulse</string>
+    <string name="custom_url_scheme">com.vedanta.fleetpulse</string>
+</resources>
