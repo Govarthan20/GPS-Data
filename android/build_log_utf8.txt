@@ -4,3 +4,31 @@ WARNING: Using flatDir should be avoided because it doesn't support any meta-dat
 
 > Configure project :capacitor-cordova-android-plugins
 WARNING: Using flatDir should be avoided because it doesn't support any meta-data formats.
+./gradlew : 
+At line:1 char:13
++ cd android; ./gradlew assembleDebug > 
+build_log.txt 2>&1
++             
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:S 
+   tring) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandErro 
+   r
+ 
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Could not determine the dependencies of task 
+':app:compileDebugJavaWithJavac'.
+> Cannot query the value of this provider 
+because it has no value available.
+
+* Try:
+> Run with --stacktrace option to get the stack 
+trace.
+> Run with --info or --debug option to get more 
+log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 6s

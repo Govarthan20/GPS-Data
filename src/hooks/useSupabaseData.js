@@ -1,9 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '../lib/supabase';
 
 /* ──────────────────────────────────────
    Demo / Fallback Data
-   (used when Supabase is not configured)
    ────────────────────────────────────── */
 const DEMO_VEHICLES = [
     { id: '1', name: 'Fleet Cruiser 01', plate_number: 'MH-01-AB-1234', type: 'sedan', status: 'available', driver_name: 'Rahul Sharma', fuel_level: 85 },
@@ -18,39 +16,6 @@ const DEMO_VEHICLES = [
     { id: '10', name: 'City Runner 02', plate_number: 'MP-09-ST-8901', type: 'van', status: 'in_use', driver_name: 'Anita Desai', fuel_level: 38 },
 ];
 
-const DEMO_GPS = DEMO_VEHICLES.map((v, i) => ({
-    vehicle_id: v.id,
-    latitude: 19.0760 + (Math.random() - 0.5) * 0.08,
-    longitude: 72.8777 + (Math.random() - 0.5) * 0.08,
-    speed: Math.round(Math.random() * 80),
-    heading: Math.round(Math.random() * 360),
-    recorded_at: new Date(Date.now() - Math.random() * 300000).toISOString(),
-    vehicle_name: v.name,
-    plate_number: v.plate_number,
-    vehicle_type: v.type,
-    vehicle_status: v.status,
-    driver_name: v.driver_name,
-    fuel_level: v.fuel_level,
-}));
-
-const DEMO_ASSIGNMENTS = DEMO_VEHICLES
-    .filter(v => v.status === 'in_use')
-    .map(v => ({
-        id: `assign-${v.id}`,
-        vehicle_id: v.id,
-        assigned_to: v.driver_name,
-        department: 'Operations',
-        purpose: 'Field Visit',
-        start_time: new Date(Date.now() - 2 * 3600000).toISOString(),
-        estimated_end: new Date(Date.now() + (1 + Math.random() * 3) * 3600000).toISOString(),
-        actual_end: null,
-    }));
-
-function isSupabaseConfigured() {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    return url && !url.includes('your-project');
-}
-
 /* ──────────────────────────────────────
    useVehicles Hook
    ────────────────────────────────────── */
@@ -60,27 +25,16 @@ export function useVehicles() {
     const [error, setError] = useState(null);
 
     const fetchVehicles = useCallback(async () => {
-        if (!isSupabaseConfigured()) {
-            setVehicles(DEMO_VEHICLES);
-            setLoading(false);
-            return;
-        }
         try {
             setLoading(true);
-            const { data, error } = await supabase
-                .from('vehicles')
-                .select('*')
-                .order('created_at', { ascending: true });
-
-            if (error) {
-                console.error('Supabase error fetching vehicles:', error.message, error.details, error.code);
-                throw error;
-            }
-            setVehicles(data || []);
+            const response = await fetch('/api/data?type=vehicles');
+            if (!response.ok) throw new Error('Failed to fetch vehicles');
+            const data = await response.json();
+            setVehicles(data);
+            setError(null);
         } catch (err) {
-            console.error('Caught error in fetchVehicles:', err);
-            const errorMessage = err?.message || (typeof err === 'object' ? JSON.stringify(err) : String(err));
-            setError(errorMessage);
+            console.error('Error fetching vehicles:', err);
+            setError(err.message);
             setVehicles(DEMO_VEHICLES);
         } finally {
             setLoading(false);
@@ -89,24 +43,9 @@ export function useVehicles() {
 
     useEffect(() => {
         fetchVehicles();
-
-        if (!isSupabaseConfigured()) return;
-
-        // Realtime subscription for vehicle status changes
-        const channel = supabase
-            .channel('vehicles-changes')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'vehicles' }, (payload) => {
-                if (payload.eventType === 'INSERT') {
-                    setVehicles(prev => [...prev, payload.new]);
-                } else if (payload.eventType === 'UPDATE') {
-                    setVehicles(prev => prev.map(v => v.id === payload.new.id ? payload.new : v));
-                } else if (payload.eventType === 'DELETE') {
-                    setVehicles(prev => prev.filter(v => v.id !== payload.old.id));
-                }
-            })
-            .subscribe();
-
-        return () => { supabase.removeChannel(channel); };
+        // Polling every 10 seconds since we don't have realtime yet
+        const interval = setInterval(fetchVehicles, 10000);
+        return () => clearInterval(interval);
     }, [fetchVehicles]);
 
     return { vehicles, loading, error, refetch: fetchVehicles };
@@ -121,67 +60,54 @@ export function useGPSLocations() {
     const [error, setError] = useState(null);
 
     const fetchPositions = useCallback(async () => {
-        if (!isSupabaseConfigured()) {
-            setPositions(DEMO_GPS);
-            setLoading(false);
-            return;
-        }
         try {
             setLoading(true);
-            const { data, error } = await supabase
-                .from('vehicle_latest_positions')
-                .select('*');
-
-            if (error) {
-                console.error('Supabase error fetching GPS positions:', error.message, error.details, error.code);
-                throw error;
-            }
-            setPositions(data || []);
+            const response = await fetch('/api/data?type=positions');
+            if (!response.ok) throw new Error('Failed to fetch positions');
+            const data = await response.json();
+            setPositions(data);
+            setError(null);
         } catch (err) {
-            console.error('Caught error in fetchPositions:', err);
-            setError(err.message || 'Unknown error');
-            setPositions(DEMO_GPS);
+            console.error('Error fetching GPS positions:', err);
+            setError(err.message);
         } finally {
             setLoading(false);
         }
     }, []);
 
     useEffect(() => {
+        // Initial fetch
         fetchPositions();
 
-        if (!isSupabaseConfigured()) {
-            // Simulate live GPS updates in demo mode
-            const interval = setInterval(() => {
-                setPositions(prev => prev.map(p => ({
-                    ...p,
-                    latitude: p.latitude + (Math.random() - 0.5) * 0.002,
-                    longitude: p.longitude + (Math.random() - 0.5) * 0.002,
-                    speed: Math.max(0, Math.min(120, p.speed + (Math.random() - 0.5) * 10)),
-                    heading: (p.heading + (Math.random() - 0.5) * 30 + 360) % 360,
-                    recorded_at: new Date().toISOString(),
-                })));
-            }, 3000);
-            return () => clearInterval(interval);
-        }
+        // Connect to Realtime Update Stream (SSE)
+        const eventSource = new EventSource('/api/realtime');
 
-        // Realtime subscription for GPS updates
-        const channel = supabase
-            .channel('gps-changes')
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'gps_locations' }, (payload) => {
-                const newLoc = payload.new;
-                setPositions(prev => {
-                    const existing = prev.findIndex(p => p.vehicle_id === newLoc.vehicle_id);
-                    if (existing >= 0) {
-                        const updated = [...prev];
-                        updated[existing] = { ...updated[existing], ...newLoc };
-                        return updated;
+        eventSource.onmessage = (event) => {
+            const update = JSON.parse(event.data);
+            if (update.type === 'gps_update') {
+                setPositions(currentPositions => {
+                    // Update the position for this specific vehicle in place
+                    const index = currentPositions.findIndex(p => p.vehicle_id === update.vehicle_id);
+                    if (index !== -1) {
+                        const newPositions = [...currentPositions];
+                        newPositions[index] = { ...newPositions[index], ...update };
+                        return newPositions;
                     }
-                    return [...prev, newLoc];
+                    // If not found in current list (rare in demo), add it
+                    return [...currentPositions, update];
                 });
-            })
-            .subscribe();
+            }
+        };
 
-        return () => { supabase.removeChannel(channel); };
+        eventSource.onerror = (err) => {
+            console.error('Realtime connection lost. Falling back to static data.', err);
+            eventSource.close();
+            // Optional: fallback polling could be re-enabled here if SSE is unreliable
+        };
+
+        return () => {
+            eventSource.close();
+        };
     }, [fetchPositions]);
 
     return { positions, loading, error, refetch: fetchPositions };
@@ -195,33 +121,24 @@ export function useAssignments() {
     const [loading, setLoading] = useState(true);
 
     const fetchAssignments = useCallback(async () => {
-        if (!isSupabaseConfigured()) {
-            setAssignments(DEMO_ASSIGNMENTS);
-            setLoading(false);
-            return;
-        }
         try {
             setLoading(true);
-            const { data, error } = await supabase
-                .from('vehicle_assignments')
-                .select('*')
-                .is('actual_end', null)
-                .order('estimated_end', { ascending: true });
-
-            if (error) {
-                console.error('Supabase error fetching assignments:', error.message, error.details, error.code);
-                throw error;
-            }
-            setAssignments(data || []);
+            const response = await fetch('/api/data?type=assignments');
+            if (!response.ok) throw new Error('Failed to fetch assignments');
+            const data = await response.json();
+            setAssignments(data);
         } catch (err) {
-            console.error('Caught error in fetchAssignments:', err);
-            setAssignments(DEMO_ASSIGNMENTS);
+            console.error('Error fetching assignments:', err);
         } finally {
             setLoading(false);
         }
     }, []);
 
-    useEffect(() => { fetchAssignments(); }, [fetchAssignments]);
+    useEffect(() => {
+        fetchAssignments();
+        const interval = setInterval(fetchAssignments, 15000);
+        return () => clearInterval(interval);
+    }, [fetchAssignments]);
 
     return { assignments, loading, refetch: fetchAssignments };
 }
@@ -238,4 +155,27 @@ export function getWaitTime(estimatedEnd) {
     const mins = minutes % 60;
     if (hours > 0) return `${hours}h ${mins}m`;
     return `${mins}m`;
+}
+
+/* ──────────────────────────────────────
+   Tracker Helper: Save GPS Data to DB
+   ────────────────────────────────────── */
+export async function saveGPSPosition(data) {
+    try {
+        const response = await fetch('/api/data', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to sync position');
+        }
+
+        return await response.json();
+    } catch (err) {
+        console.error('GPS Upload Error:', err);
+        throw err;
+    }
 }

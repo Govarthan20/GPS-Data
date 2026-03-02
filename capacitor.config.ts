@@ -17,6 +17,10 @@ const config: CapacitorConfig = {
       style: 'LIGHT',
     },
   },
+  server: {
+    url: 'http://192.168.1.37:3000',
+    cleartext: true,
+  },
 };
 
 export default config;

@@ -60,7 +60,10 @@ export default function WaitTimePanel({ assignments, vehicles }) {
                                 )}
                             </div>
                             <div className="wait-item-time">
-                                <span className={`wait-time-value ${isDueSoon ? 'pulse' : ''}`}>
+                                <span
+                                    className={`wait-time-value ${isDueSoon ? 'pulse' : ''}`}
+                                    suppressHydrationWarning
+                                >
                                     {waitTime}
                                 </span>
                                 <span className="wait-time-label">est. return</span>

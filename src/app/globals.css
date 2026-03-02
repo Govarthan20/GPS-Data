@@ -777,33 +777,6 @@ body {
 }
 
 /* ==========================================================
-   DEMO BANNER - Professional green bar
-   ========================================================== */
-.demo-banner {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 12px 24px;
-  background: var(--vedanta-navy);
-  border-top: 2px solid var(--vedanta-green);
-  text-align: center;
-  font-size: 0.78rem;
-  color: rgba(255, 255, 255, 0.8);
-  z-index: 1001;
-  font-weight: 500;
-}
-
-.demo-banner code {
-  background: rgba(0, 166, 80, 0.2);
-  color: var(--vedanta-green-light);
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 0.72rem;
-  font-weight: 600;
-}
-
-/* ==========================================================
    SCROLLBAR
    ========================================================== */
 ::-webkit-scrollbar {
@@ -1051,12 +1024,6 @@ body {
     font-size: 0.62rem;
   }
 
-  .demo-banner {
-    padding: 8px 12px;
-    font-size: 0.7rem;
-    padding-bottom: calc(8px + env(safe-area-inset-bottom));
-  }
-
   .popup-content {
     min-width: 180px;
   }
@@ -1150,6 +1117,146 @@ body {
   from {
     opacity: 0;
     transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==========================================================
+   MOBILE NAVIGATION - Bottom tab bar
+   ========================================================== */
+.mobile-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background: rgba(12, 26, 58, 0.9);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  grid-template-columns: repeat(4, 1fr);
+  z-index: 1002;
+  padding-bottom: env(safe-area-inset-bottom);
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 640px) {
+  .mobile-nav {
+    display: grid;
+  }
+
+  .dashboard {
+    padding-bottom: 80px;
+    /* Space for nav */
+  }
+
+}
+
+.mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: rgba(255, 255, 255, 0.45);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+.mobile-nav-item.active {
+  color: var(--vedanta-green-light);
+}
+
+.mobile-nav-item.active svg {
+  transform: translateY(-2px);
+  filter: drop-shadow(0 0 8px rgba(0, 166, 80, 0.4));
+}
+
+/* Tab visibility utility */
+@media (max-width: 640px) {
+  .mobile-hide {
+    display: none !important;
+  }
+
+  .mobile-view {
+    display: block !important;
+    animation: fadeInTab 0.3s ease;
+  }
+}
+
+@media (min-width: 641px) {
+  .mobile-hide {
+    display: block !important;
+  }
+}
+
+@keyframes fadeInTab {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==========================================================
+   SYNC CONTROL
+   ========================================================== */
+.sync-control {
+  padding: 10px 20px 14px;
+  background: #f8fafc;
+  border-bottom: 1px solid var(--border-color);
+  animation: slideDown 0.3s ease;
+}
+
+.sync-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.sync-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: all 0.3s ease;
+}
+
+.sync-label.active {
+  color: #dc2626;
+  animation: pulse-sync 2s infinite;
+}
+
+@keyframes pulse-sync {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.6;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
   }
 
   to {

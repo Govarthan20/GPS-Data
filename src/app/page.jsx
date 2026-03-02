@@ -11,8 +11,10 @@ const GPSMap = dynamic(() => import('../components/GPSMap'), {
 });
 import VehicleList from '../components/VehicleList';
 import WaitTimePanel from '../components/WaitTimePanel';
-import { useVehicles, useGPSLocations, useAssignments } from '../hooks/useSupabaseData';
+import { useVehicles, useGPSLocations, useAssignments, saveGPSPosition } from '../hooks/useSupabaseData';
 import { useDeviceLocation } from '../hooks/useDeviceLocation';
+
+import MobileNav from '../components/MobileNav';
 
 export default function Home() {
     const { vehicles, loading: vehiclesLoading, refetch: refetchVehicles } = useVehicles();
@@ -21,6 +23,40 @@ export default function Home() {
     const { location: deviceLocation, error: gpsError } = useDeviceLocation();
 
     const [selectedVehicle, setSelectedVehicle] = useState(null);
+    const [activeTab, setActiveTab] = useState('dashboard');
+    const [isSyncing, setIsSyncing] = useState(false);
+    const [mounted, setMounted] = useState(false);
+
+    // Auto-sync device location to database if enabled
+    React.useEffect(() => {
+        let syncInterval;
+        if (isSyncing && deviceLocation && selectedVehicle) {
+            const sync = async () => {
+                try {
+                    await saveGPSPosition({
+                        vehicle_id: selectedVehicle,
+                        latitude: deviceLocation.latitude,
+                        longitude: deviceLocation.longitude,
+                        speed: deviceLocation.speed,
+                        heading: deviceLocation.heading,
+                        accuracy: deviceLocation.accuracy,
+                        altitude: deviceLocation.altitude
+                    });
+                } catch (err) {
+                    console.error("Failed to sync GPS position:", err);
+                }
+            };
+
+            // Sync immediately then every 5 seconds while active
+            sync();
+            syncInterval = setInterval(sync, 5000);
+        }
+        return () => clearInterval(syncInterval);
+    }, [isSyncing, deviceLocation, selectedVehicle]);
+
+    React.useEffect(() => {
+        setMounted(true);
+    }, []);
 
     const isLoading = vehiclesLoading || gpsLoading || assignmentsLoading;
 
@@ -34,16 +70,21 @@ export default function Home() {
         setSelectedVehicle(prev => prev === vehicleId ? null : vehicleId);
     }, []);
 
+    // Helper to determine visibility on mobile
+    const getTabClass = (tabId) => {
+        return activeTab === tabId ? 'mobile-view' : 'mobile-hide';
+    };
+
     return (
         <div className="app dashboard" id="app-root">
             <Header onRefresh={handleRefresh} isLoading={isLoading} />
 
-            <section className="dashboard-section" style={{ padding: '0 32px' }}>
+            <section className={`dashboard-section ${getTabClass('dashboard')}`} style={{ padding: '0 32px' }}>
                 <StatusCards vehicles={vehicles} />
             </section>
 
             <main className="dashboard-content">
-                <div className="content-main">
+                <div className={`content-main ${getTabClass('map')}`}>
                     <div className="map-container">
                         <GPSMap
                             positions={positions}
@@ -55,20 +96,28 @@ export default function Home() {
                 </div>
 
                 <aside className="content-sidebar">
-                    <WaitTimePanel assignments={assignments} vehicles={vehicles} />
-                    <VehicleList
-                        vehicles={vehicles}
-                        positions={positions}
-                        selectedVehicle={selectedVehicle}
-                        onSelectVehicle={handleSelectVehicle}
-                    />
+                    <div className={getTabClass('wait')}>
+                        <WaitTimePanel assignments={assignments} vehicles={vehicles} />
+                    </div>
+                    <div className={getTabClass('vehicles')}>
+                        <VehicleList
+                            vehicles={vehicles}
+                            positions={positions}
+                            selectedVehicle={selectedVehicle}
+                            onSelectVehicle={handleSelectVehicle}
+                            isSyncing={isSyncing}
+                            setIsSyncing={setIsSyncing}
+                        />
+                    </div>
                 </aside>
             </main>
+
+            <MobileNav activeTab={activeTab} setActiveTab={setActiveTab} />
 
             {gpsError && (
                 <div style={{
                     position: 'fixed',
-                    bottom: '24px',
+                    bottom: activeTab === 'dashboard' ? '24px' : '88px', // Adjust for mobile nav
                     left: '24px',
                     background: '#dc2626',
                     color: 'white',
