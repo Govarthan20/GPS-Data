@@ -1,22 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 
 /* ──────────────────────────────────────
-   Demo / Fallback Data
-   ────────────────────────────────────── */
-const DEMO_VEHICLES = [
-    { id: '1', name: 'Fleet Cruiser 01', plate_number: 'MH-01-AB-1234', type: 'sedan', status: 'available', driver_name: 'Rahul Sharma', fuel_level: 85 },
-    { id: '2', name: 'Fleet Cruiser 02', plate_number: 'MH-01-CD-5678', type: 'sedan', status: 'in_use', driver_name: 'Priya Patel', fuel_level: 62 },
-    { id: '3', name: 'Cargo Hauler 01', plate_number: 'MH-02-EF-9012', type: 'truck', status: 'in_use', driver_name: 'Amit Kumar', fuel_level: 45 },
-    { id: '4', name: 'City Runner 01', plate_number: 'DL-03-GH-3456', type: 'van', status: 'maintenance', driver_name: 'Suresh Reddy', fuel_level: 30 },
-    { id: '5', name: 'Highway Star 01', plate_number: 'KA-04-IJ-7890', type: 'suv', status: 'available', driver_name: 'Deepa Nair', fuel_level: 92 },
-    { id: '6', name: 'Metro Express 01', plate_number: 'TN-05-KL-2345', type: 'bus', status: 'in_use', driver_name: 'Vijay Singh', fuel_level: 55 },
-    { id: '7', name: 'Swift Rider 01', plate_number: 'GJ-06-MN-6789', type: 'motorcycle', status: 'available', driver_name: 'Karan Mehta', fuel_level: 78 },
-    { id: '8', name: 'Fleet Cruiser 03', plate_number: 'RJ-07-OP-0123', type: 'sedan', status: 'offline', driver_name: 'Neha Gupta', fuel_level: 10 },
-    { id: '9', name: 'Cargo Hauler 02', plate_number: 'UP-08-QR-4567', type: 'truck', status: 'available', driver_name: 'Ravi Verma', fuel_level: 70 },
-    { id: '10', name: 'City Runner 02', plate_number: 'MP-09-ST-8901', type: 'van', status: 'in_use', driver_name: 'Anita Desai', fuel_level: 38 },
-];
-
-/* ──────────────────────────────────────
    useVehicles Hook
    ────────────────────────────────────── */
 export function useVehicles() {
@@ -35,7 +19,6 @@ export function useVehicles() {
         } catch (err) {
             console.error('Error fetching vehicles:', err);
             setError(err.message);
-            setVehicles(DEMO_VEHICLES);
         } finally {
             setLoading(false);
         }
@@ -93,7 +76,7 @@ export function useGPSLocations() {
                         newPositions[index] = { ...newPositions[index], ...update };
                         return newPositions;
                     }
-                    // If not found in current list (rare in demo), add it
+                    // If not found in current list, add it (newly active vehicle)
                     return [...currentPositions, update];
                 });
             }

@@ -8,7 +8,7 @@ import {
 } from '../utils/helpers';
 import { MapPin, Gauge, Fuel, Clock } from 'lucide-react';
 
-export default function VehicleList({ vehicles, positions, selectedVehicle, onSelectVehicle, isSyncing, setIsSyncing }) {
+export default function VehicleList({ vehicles, positions, selectedVehicle, onSelectVehicle }) {
     const getPositionForVehicle = (vehicleId) => {
         return positions.find(p => p.vehicle_id === vehicleId);
     };
@@ -71,21 +71,6 @@ export default function VehicleList({ vehicles, positions, selectedVehicle, onSe
                                     </div>
                                 </div>
                             </div>
-
-                            {isSelected && (
-                                <div className="sync-control">
-                                    <label className="sync-toggle">
-                                        <input
-                                            type="checkbox"
-                                            checked={isSyncing}
-                                            onChange={(e) => setIsSyncing(e.target.checked)}
-                                        />
-                                        <span className={`sync-label ${isSyncing ? 'active' : ''}`}>
-                                            {isSyncing ? '🔴 Live Syncing My GPS' : '📡 Sync My Device GPS'}
-                                        </span>
-                                    </label>
-                                </div>
-                            )}
                         </div>
                     );
                 })}

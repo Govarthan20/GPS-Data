@@ -114,27 +114,5 @@ CREATE TRIGGER tr_notify_gps_update
   AFTER INSERT OR UPDATE ON gps_locations
   FOR EACH ROW EXECUTE FUNCTION notify_gps_update();
 
--- 7. SEED DATA (Demo)
-INSERT INTO vehicles (name, plate_number, type, status, driver_name, fuel_level) VALUES
-  ('Fleet Cruiser 01', 'MH-01-AB-1234', 'sedan', 'available', 'Rahul Sharma', 85),
-  ('Fleet Cruiser 02', 'MH-01-CD-5678', 'sedan', 'in_use', 'Priya Patel', 62),
-  ('Cargo Hauler 01', 'MH-02-EF-9012', 'truck', 'in_use', 'Amit Kumar', 45),
-  ('City Runner 01', 'DL-03-GH-3456', 'van', 'maintenance', 'Suresh Reddy', 30),
-  ('Highway Star 01', 'KA-04-IJ-7890', 'suv', 'available', 'Deepa Nair', 92),
-  ('Metro Express 01', 'TN-05-KL-2345', 'bus', 'in_use', 'Vijay Singh', 55),
-  ('Swift Rider 01', 'GJ-06-MN-6789', 'motorcycle', 'available', 'Karan Mehta', 78),
-  ('Fleet Cruiser 03', 'RJ-07-OP-0123', 'sedan', 'offline', 'Neha Gupta', 10),
-  ('Cargo Hauler 02', 'UP-08-QR-4567', 'truck', 'available', 'Ravi Verma', 70),
-  ('City Runner 02', 'MP-09-ST-8901', 'van', 'in_use', 'Anita Desai', 38)
-ON CONFLICT (plate_number) DO NOTHING;
-
--- Seed initial locations
-DO $$
-DECLARE
-  v_id UUID;
-BEGIN
-  FOR v_id IN SELECT id FROM vehicles LOOP
-    INSERT INTO gps_locations (vehicle_id, latitude, longitude, speed, heading)
-    VALUES (v_id, 19.076 + (random()-0.5)*0.1, 72.877 + (random()-0.5)*0.1, random()*60, random()*360);
-  END LOOP;
-END $$;
+-- 7. CLEANUP / TRUNCATE HELPER (Optional: Run this to clear existing demo data)
+-- TRUNCATE TABLE vehicles, gps_locations, vehicle_assignments CASCADE;

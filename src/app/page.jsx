@@ -11,7 +11,7 @@ const GPSMap = dynamic(() => import('../components/GPSMap'), {
 });
 import VehicleList from '../components/VehicleList';
 import WaitTimePanel from '../components/WaitTimePanel';
-import { useVehicles, useGPSLocations, useAssignments, saveGPSPosition } from '../hooks/useSupabaseData';
+import { useVehicles, useGPSLocations, useAssignments } from '../hooks/useSupabaseData';
 import { useDeviceLocation } from '../hooks/useDeviceLocation';
 
 import MobileNav from '../components/MobileNav';
@@ -24,35 +24,7 @@ export default function Home() {
 
     const [selectedVehicle, setSelectedVehicle] = useState(null);
     const [activeTab, setActiveTab] = useState('dashboard');
-    const [isSyncing, setIsSyncing] = useState(false);
     const [mounted, setMounted] = useState(false);
-
-    // Auto-sync device location to database if enabled
-    React.useEffect(() => {
-        let syncInterval;
-        if (isSyncing && deviceLocation && selectedVehicle) {
-            const sync = async () => {
-                try {
-                    await saveGPSPosition({
-                        vehicle_id: selectedVehicle,
-                        latitude: deviceLocation.latitude,
-                        longitude: deviceLocation.longitude,
-                        speed: deviceLocation.speed,
-                        heading: deviceLocation.heading,
-                        accuracy: deviceLocation.accuracy,
-                        altitude: deviceLocation.altitude
-                    });
-                } catch (err) {
-                    console.error("Failed to sync GPS position:", err);
-                }
-            };
-
-            // Sync immediately then every 5 seconds while active
-            sync();
-            syncInterval = setInterval(sync, 5000);
-        }
-        return () => clearInterval(syncInterval);
-    }, [isSyncing, deviceLocation, selectedVehicle]);
 
     React.useEffect(() => {
         setMounted(true);
@@ -105,8 +77,6 @@ export default function Home() {
                             positions={positions}
                             selectedVehicle={selectedVehicle}
                             onSelectVehicle={handleSelectVehicle}
-                            isSyncing={isSyncing}
-                            setIsSyncing={setIsSyncing}
                         />
                     </div>
                 </aside>

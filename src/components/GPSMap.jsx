@@ -60,13 +60,21 @@ export default function GPSMap({ positions, selectedVehicle, onSelectVehicle, de
     }, [positions, selectedVehicle, deviceLocation]);
 
     // Create custom colorful circle marker for vehicles
-    const createCustomIcon = (status) => {
+    const createCustomIcon = (status, heading, type) => {
         const color = getStatusColor(status);
+        // An SVG that looks like a vehicle from the top down, pointing UP at 0 degrees
+        const svg = `
+        <svg fill="${color}" stroke="#ffffff" stroke-width="2" width="28" height="28" viewBox="0 0 24 24" style="transform: rotate(${heading || 0}deg);">
+            <path d="M4.5,10 C4.5,8.5 5.5,7 8,7 L16,7 C18.5,7 19.5,8.5 19.5,10 L20.5,18 C20.5,19 19,20 18,20 L6,20 C5,20 3.5,19 3.5,18 L4.5,10 Z"></path>
+            <path d="M7,11 L17,11 L16,14 L8,14 L7,11 Z" fill="#ffffff" stroke="none"></path>
+        </svg>
+        `;
         return L.divIcon({
             className: 'custom-vehicle-marker',
-            html: `<div style="background-color: ${color}; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.3);"></div>`,
-            iconSize: [18, 18],
-            iconAnchor: [9, 9]
+            html: `<div style="width: 28px; height: 28px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));">${svg}</div>`,
+            iconSize: [28, 28],
+            iconAnchor: [14, 14],
+            popupAnchor: [0, -14]
         });
     };
 
@@ -123,7 +131,7 @@ export default function GPSMap({ positions, selectedVehicle, onSelectVehicle, de
                     <Marker
                         key={pos.vehicle_id}
                         position={[pos.latitude, pos.longitude]}
-                        icon={createCustomIcon(pos.vehicle_status)}
+                        icon={createCustomIcon(pos.vehicle_status, pos.heading, pos.vehicle_type)}
                         eventHandlers={{
                             click: () => onSelectVehicle?.(pos.vehicle_id),
                         }}
