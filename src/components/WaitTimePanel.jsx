@@ -3,14 +3,25 @@ import { Clock, User, MapPin, ArrowRight } from 'lucide-react';
 import { getWaitTime } from '../hooks/useSupabaseData';
 
 export default function WaitTimePanel({ assignments, vehicles }) {
+    const [tick, setTick] = React.useState(0);
+    React.useEffect(() => {
+        setTick(1); // Force initial client render to match hydrating string or just to trigger client time
+        const timer = setInterval(() => setTick(t => t + 1), 60000);
+        return () => clearInterval(timer);
+    }, []);
+
     // Only show in-use vehicles with assignments
     const activeAssignments = assignments
         .map(a => {
             const vehicle = vehicles.find(v => v.id === a.vehicle_id);
             return { ...a, vehicle };
         })
-        .filter(a => a.vehicle)
-        .sort((a, b) => new Date(a.estimated_end) - new Date(b.estimated_end));
+        .filter(a => a.vehicle && a.vehicle.status === 'in_use')
+        .sort((a, b) => {
+            if (!a.estimated_end) return 1;
+            if (!b.estimated_end) return -1;
+            return new Date(a.estimated_end) - new Date(b.estimated_end);
+        });
 
     if (activeAssignments.length === 0) {
         return (

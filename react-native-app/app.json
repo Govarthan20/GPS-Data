@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "name": "Vedanta FleetPulse",
+    "slug": "fleetpulse-native",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0c1a3a"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.vedanta.fleetpulse"
+    },
+    "android": {
+      "package": "com.vedanta.fleetpulse",
+      "adaptiveIcon": {
+        "backgroundColor": "#0c1a3a",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}

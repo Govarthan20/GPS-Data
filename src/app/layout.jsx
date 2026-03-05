@@ -15,6 +15,7 @@ export default function RootLayout({ children }) {
     return (
         <html lang="en">
             <head>
+                <link rel="icon" type="image/x-icon" href="/favicon.ico" />
                 <link rel="icon" type="image/png" href="/favicon.png" />
                 <link rel="manifest" href="/manifest.json" />
                 <meta name="apple-mobile-web-app-capable" content="yes" />

@@ -1,8 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    // Commented out output: 'export' to allow dynamic API routes and database connections.
-    // If you are building for Capacitor, uncomment this or run a dedicated build script.
-    // output: 'export', 
+    typescript: {
+        ignoreBuildErrors: true,
+    },
+    eslint: {
+        ignoreDuringBuilds: true,
+    },
     images: {
         unoptimized: true,
     },

@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useMemo, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap, ZoomControl } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap, ZoomControl, Polyline } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { getStatusColor, getStatusLabel, formatSpeed, formatTime } from '../utils/helpers';
+import { matchPassengerToDriver } from '../utils/rideSharing';
 
 // Fix for default Leaflet icons in Next.js environment
 const fixLeafletIcons = () => {
@@ -91,6 +92,27 @@ export default function GPSMap({ positions, selectedVehicle, onSelectVehicle, de
         iconAnchor: [10, 10]
     });
 
+    const bestMatch = useMemo(() => {
+        if (!deviceLocation || positions.length === 0) return null;
+
+        // Adapt positions for the algorithm
+        const driversForAlgorithm = positions.map(p => ({
+            ...p,
+            lat: p.latitude,
+            lon: p.longitude,
+            capacity: 4, // Default capacity since we don't have it in the DB yet
+            status: p.vehicle_status || 'available' // Treat as available if status is missing, but algorithms requires 'available'
+        }));
+
+        const passenger = {
+            lat: deviceLocation.latitude,
+            lon: deviceLocation.longitude,
+            seatsRequired: 1
+        };
+
+        return matchPassengerToDriver(passenger, driversForAlgorithm, 50); // Search within 50km radius
+    }, [deviceLocation, positions]);
+
     return (
         <div className="map-container" id="gps-map-container" style={{ height: '100%', width: '100%', borderRadius: '16px', overflow: 'hidden' }}>
             <MapContainer
@@ -165,6 +187,40 @@ export default function GPSMap({ positions, selectedVehicle, onSelectVehicle, de
                         </Popup>
                     </Marker>
                 ))}
+
+                {/* Best Match Polyline */}
+                {deviceLocation && bestMatch && (
+                    <Polyline
+                        positions={[
+                            [deviceLocation.latitude, deviceLocation.longitude],
+                            [bestMatch.latitude, bestMatch.longitude]
+                        ]}
+                        color="#00a650"
+                        dashArray="10, 10"
+                        weight={3}
+                        opacity={0.8}
+                    >
+                        <Popup>
+                            <div className="popup-content">
+                                <strong>Best Driver Assigned</strong>
+                                <div className="popup-details" style={{ marginTop: '8px' }}>
+                                    <div className="popup-row">
+                                        <span className="popup-label">Vehicle:</span>
+                                        <span>{bestMatch.vehicle_name || 'Vehicle'}</span>
+                                    </div>
+                                    <div className="popup-row">
+                                        <span className="popup-label">Distance:</span>
+                                        <span>{bestMatch.distanceToPassenger} km</span>
+                                    </div>
+                                    <div className="popup-row">
+                                        <span className="popup-label">ETA:</span>
+                                        <span>~{bestMatch.estimatedEtaMinutes} min</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </Popup>
+                    </Polyline>
+                )}
             </MapContainer>
 
             <div className="map-overlay-info">

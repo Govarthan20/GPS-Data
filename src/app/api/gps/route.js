@@ -30,8 +30,16 @@ async function getOrCreateVehicleByDevice(deviceIp) {
         [deviceName, deviceIp, deviceIp]
     );
 
-    console.log(`Registered new vehicle for device ${deviceIp}: ID ${newVehicle.rows[0].id}`);
-    return newVehicle.rows[0].id;
+    const vehicleId = newVehicle.rows[0].id;
+
+    // Automatically create a simulated assignment so this device appears on the Wait Time Panel
+    await query(`
+        INSERT INTO vehicle_assignments (vehicle_id, assigned_to, department, purpose, estimated_end)
+        VALUES ($1, 'Mobile User', 'Field Testing', 'Live app testing', NOW() + INTERVAL '30 minutes')
+    `, [vehicleId]);
+
+    console.log(`Registered new vehicle and assignment for device ${deviceIp}: ID ${vehicleId}`);
+    return vehicleId;
 }
 
 export async function POST(request) {
